@@ -1,8 +1,13 @@
-FROM python:3
+FROM python:latest
 
 RUN apt-get update
 
+WORKDIR /app
+
 RUN pip install django==3.2
+
+# Install project dependencies
+RUN pip install -r requirements.txt
 
 COPY . .
 
