@@ -14,7 +14,7 @@ pipeline {
                     def branchName = env.BRANCH_NAME
 
                     // Construct the Docker image name based on the branch name
-                    def dockerImageName = "khareutkarsh/${branchName}-sample-webapp:L20_jenkins"
+                    def dockerImageName = "khareutkarsh/${branchName}-django-app:latest"
 
                     // Using the global credentials directly in the `withCredentials` block
                     withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
