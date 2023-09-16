@@ -1,54 +1,29 @@
 pipeline {
     agent any
 
+ parameters {
+        string(name: 'DOCKERHUB_CREDENTIALS', defaultValue: '', description: 'Docker Hub credentials ID')
+    }
+
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
 
-        stage('Install Dependencies') {
+        stage('Build and Publish') {
             steps {
-                sh 'pip install -r requirements.txt'
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh 'python manage.py test'
-            }
-        }
-
-        stage('Collect Static Files') {
-            steps {
-                sh 'python manage.py collectstatic --noinput'
-            }
-        }
-
-        stage('Database Migrations') {
-            steps {
-                sh 'python manage.py migrate'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                // Add your deployment steps here
-                // This could involve copying files to a server, updating a web server, etc.
+     withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "docker build -t ${DOCKER_USERNAME}/django:latest ."
+                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                        sh "docker push ${DOCKER_USERNAME}/django:latest"           
             }
         }
     }
 
-    post {
-        success {
-            // This section is executed when the pipeline is successful
-            echo 'Pipeline completed successfully'
-        }
-
-        failure {
-            // This section is executed when the pipeline fails
-            echo 'Pipeline failed'
+        stage('Run Container') {
+            steps {
+                // Run the Docker container
+                script {
+                    docker.image('khareutkarsh/django:latest').run('-p 8080:80')
+                }
+            }
         }
     }
 }
