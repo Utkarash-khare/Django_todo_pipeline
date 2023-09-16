@@ -27,16 +27,11 @@ pipeline {
         }
 
         
-        stage('Deploy to Kubernetes') {
+        stage('Run Container') {
             steps {
+                // Run the Docker container
                 script {
-                    def NAMESPACE = env.BRANCH_NAME
-
-                    // Replace the placeholder in the template with the actual namespace
-                    sh "kubectl config set-context --current --namespace=${NAMESPACE}"
-
-                    // Apply the modified YAML file to Kubernetes
-                    sh "kubectl apply -f manifest.yaml"
+                    docker.image('khareutkarsh/sample-webapp:jenkins_L19').run('-p 8080:80')
                 }
             }
         }
