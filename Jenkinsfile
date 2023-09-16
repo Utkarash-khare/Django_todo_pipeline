@@ -1,29 +1,28 @@
 pipeline {
     agent any
 
- parameters {
-        string(name: 'DOCKERHUB_CREDENTIALS', defaultValue: '', description: 'Docker Hub credentials ID')
-    }
-
     stages {
-
-        stage('Build and Publish') {
+        stage('Checkout') {
             steps {
-     withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh "docker build -t ${DOCKER_USERNAME}/django:latest ."
-                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                        sh "docker push ${DOCKER_USERNAME}/django:latest"           
+                // Checkout your code from your version control system (e.g., Git)
+                checkout scm
             }
         }
-    }
 
-        stage('Run Container') {
+        
+
+        stage('Build & Push') {
             steps {
-                // Run the Docker container
                 script {
-                    docker.image('khareutkarsh/django:latest').run('-p 8080:80')
+ 
+                    // Log in to Docker registry
+                    withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                       // Build the Docker image
+                    sh "docker build -t ${DOCKER_USERNAME}/django:latest ." 
+                    sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                    // Push the Docker image to your registry (e.g., Docker Hub)
+                    sh "docker push ${DOCKER_USERNAME}/django:latest"
+                    }
                 }
             }
         }
-    }
-}
