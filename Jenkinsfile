@@ -31,7 +31,7 @@ pipeline {
             steps {
                 // Run the Docker container
                 script {
-                    docker.image('khareutkarsh/sample-webapp:jenkins_L19').run('-p 8080:80')
+                    docker.image('khareutkarsh/master-django-app:latest').run('-p 8000:80')
                 }
             }
         }
